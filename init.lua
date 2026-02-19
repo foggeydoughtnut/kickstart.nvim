@@ -94,27 +94,27 @@ vim.opt.termguicolors = true
 vim.g.clipboard = {
   name = 'OSC 52',
   copy = {
-    ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
-    ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+    ['+'] = require('vim.ui.clipboard.osc52').copy '+',
+    ['*'] = require('vim.ui.clipboard.osc52').copy '*',
   },
   paste = {
-    ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
-    ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+    ['+'] = require('vim.ui.clipboard.osc52').paste '+',
+    ['*'] = require('vim.ui.clipboard.osc52').paste '*',
   },
 }
 
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = "*.go",
+vim.api.nvim_create_autocmd('BufWritePre', {
+  pattern = '*.go',
   callback = function()
-    vim.lsp.buf.code_action({
+    vim.lsp.buf.code_action {
       context = {
-        only = { "source.organizeImports" },
+        only = { 'source.organizeImports' },
         diagnostics = vim.diagnostic.get(0),
       },
       apply = true,
       timeout_ms = 3000,
-    })
-    vim.lsp.buf.format({ async = false })
+    }
+    vim.lsp.buf.format { async = false }
   end,
 })
 
@@ -342,14 +342,18 @@ require('lazy').setup({
       'nvim-tree/nvim-web-devicons',
     },
     config = function()
-      require('nvim-tree').setup()
+      require('nvim-tree').setup {
+        filters = {
+          --- display dot files in file explorer
+          dotfiles = false,
+          git_ignored = false,
+        },
+      }
 
       local function open_nvim_tree(data)
         local real_file = vim.fn.filereadable(data.file) == 1
         local no_name = data.file == '' and vim.bo[data.buf].buftype == ''
-        if not real_file and not no_name then
-          return
-        end
+        if not real_file and not no_name then return end
         require('nvim-tree.api').tree.toggle { focus = false, find_file = true }
       end
 
@@ -666,6 +670,10 @@ require('lazy').setup({
             },
           },
         },
+        sqls = (function()
+          local ok, local_cfg = pcall(require, 'db')
+          return ok and local_cfg.sqls or {}
+        end)(),
       }
 
       -- Ensure the servers and tools above are installed
